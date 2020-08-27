@@ -1,0 +1,25 @@
+{
+	"CONFIG_VERSION": "1.1.1",
+	"LED_TYPES": [
+		{
+			"TYPE": "SIGNAL",
+			"NUM_OF_GROUPS": 0,
+			"NUM_OF_LEDS_PER_GROUP": 0
+		},
+		{
+			"TYPE": "PROGRAMMABLE",
+			"NUM_OF_GROUPS": 1,
+			"NUM_OF_LEDS_PER_GROUP": 6,
+			"PATHS": [
+				[
+					"DA681A:GREEN:PRG1",
+					"DA681A:GREEN:PRG2",
+					"DA681A:GREEN:PRG3",
+					"DA681A:GREEN:PRG4",
+					"DA681A:GREEN:PRG5",
+					"DA681A:GREEN:PRG6"
+				]
+			]
+		}
+	]
+}
