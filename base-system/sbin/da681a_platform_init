@@ -1,0 +1,85 @@
+#!/bin/bash
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Authors:
+#	2020	Elvis Yao <ElvisCW.Yao@moxa.com>
+#
+# Description:
+#	For Moxa DA-681A-I-SP (CN)/DA-681A-I-DPP (CN) series
+#
+
+
+gpio_request() {
+	local gpio=${1}
+
+	if [ ! -e "/sys/class/gpio/gpio${gpio}" ]
+	then
+		echo "${gpio}" > /sys/class/gpio/export
+	fi
+}
+
+gpio_set_value() {
+	local gpio=${1}
+	local value=${2}
+
+	gpio_request "${gpio}"
+	case "${value}" in
+	0)
+		echo "low" > "/sys/class/gpio/gpio${gpio}/direction"
+		;;
+	1)
+		echo "high" > "/sys/class/gpio/gpio${gpio}/direction"
+		;;
+	esac
+}
+
+gp() {
+	for gpiochip in /sys/class/gpio/gpiochip*
+	do
+		if cat "${gpiochip}"/label | grep -q "gpio_it87"
+		then
+			base=$(cat "${gpiochip}"/base)
+			break
+		fi
+	done
+
+	tens=$(($1 / 10))
+	units=$(($1 % 10))
+	echo $((base + 8 * (tens - 1) + units))
+}
+
+initial_it87_uart() {
+	# UART 0 GPIO init
+	gpio_set_value "$(gp 13)" 0 # GP13 UR1_232EN	#139
+	gpio_set_value "$(gp 11)" 0 # GP11 UR1_485	#137
+	gpio_set_value "$(gp 12)" 0 # GP12 UR1_422	#138
+
+	# UART 1 GPIO init
+	gpio_set_value "$(gp 16)" 0 # GP16 UR2_232EN	#142
+	gpio_set_value "$(gp 14)" 0 # GP14 UR2_485	#140
+	gpio_set_value "$(gp 15)" 0 # GP15 UR2_422	#141
+
+	# setup UART port0~1 default mode as RS-232
+	/sbin/mx-uart-ctl -p 0 -m 0
+	/sbin/mx-uart-ctl -p 1 -m 0
+}
+
+initial_relay() {
+	# export relay gpio pin, default status is high (open)
+	gpio_set_value "$(gp 65)" 1 # GP65 RELAY_CNTRL	#181
+}
+
+case "$1" in
+	start)
+		initial_it87_uart
+		initial_relay
+	;;
+	stop)
+		:
+	;;
+	*)
+		echo "Usage: $0 start|stop" >&2
+		exit 3
+	;;
+esac

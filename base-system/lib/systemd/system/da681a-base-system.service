@@ -1,0 +1,12 @@
+[Unit]
+Description=Moxa DA-681A series initial setting
+Before=rc-local.service
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/da681a_platform_init start
+ExecStop=/sbin/da681a_platform_init stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
